@@ -25,7 +25,10 @@ def fetchThisStock(code):
     DIV = findNextSibling(code, soup, "Forward annual dividend rate")
 
     if EBITDA and EV and PSALES and PBOOK and ROE and OM and DIV:
-        print (EBITDA + "" + EV + "" + PSALES + "" + PBOOK + "" + ROE + "" + OM + "" + DIV)
+        # print (EBITDA + "" + EV + "" + PSALES + "" + PBOOK + "" + ROE + "" + OM + "" + DIV)
+        pass
+    else:
+        return
 
     #  ----------------          Yahoo        ------------
 
@@ -37,6 +40,10 @@ def fetchThisStock(code):
     # print(in_page)
 
     in_soup = BeautifulSoup(in_page, "html.parser")
+
+    nameheader = in_soup.find('h4', class_='stock-name')
+    fullname = nameheader.a.span.text
+    STOCKNAME = re.sub(r'\(.*\)', '', fullname).rstrip()  # remove stock code in bracket eg.  (SGX: AZG)
 
     price_span = in_soup.find('strong', class_='stock-price')
     PRICE = price_span.text
@@ -54,10 +61,17 @@ def fetchThisStock(code):
     beta500_text = in_soup.find('td', text=re.compile('.*Beta - 500 Days.*'))
     BETA500 = beta500_text.find_next('td').text
 
-    if PRICE and PERCENT_CHANGE and PRICE_CHANGE and EPS and BETA75 and BETA500:
-        print (PRICE + "" + PERCENT_CHANGE + "" + PRICE_CHANGE + "" + EPS + "" + BETA75 + "" + BETA500)
+    if STOCKNAME and PRICE and PERCENT_CHANGE and PRICE_CHANGE and EPS and BETA75 and BETA500:
+        # print (STOCKNAME + "" + PRICE + "" + PERCENT_CHANGE + "" + PRICE_CHANGE + "" + EPS + "" + BETA75 + "" + BETA500)
+        pass
+    else:
+        return
 
-    #  ----------------          Investingnote        ------------
+        #  ----------------          Investingnote        ------------
+
+    stockData = [STOCKNAME, code, PRICE, PRICE_CHANGE, PERCENT_CHANGE, EPS, BETA75, BETA500, EBITDA, EV, PSALES, PBOOK,
+                 ROE, OM, DIV]
+    return stockData
 
 
 def findNextSibling(code, soup, text):
@@ -66,5 +80,5 @@ def findNextSibling(code, soup, text):
         ebitda_val = ebitda_text.parent.next_sibling.text
         return ebitda_val
     else:
-        print(code + " " + text + " IS NONE -------")
+        print(code + " " + text + "           ------------- NOT AVAILABLE ------------- ")
         return False
