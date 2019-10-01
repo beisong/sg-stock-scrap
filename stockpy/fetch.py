@@ -28,17 +28,19 @@ def fetchThisStock(code):
     rawsoup = BeautifulSoup(page, "html.parser")
     soup = rawsoup.find('div', class_='YDC-Col1')
 
-    EBITDA = findNextSibling(code, soup, "EBITDA")
-    EBITDA = convertUnits(EBITDA)
+    EBITDA = findNextSibling_yahoo(code, soup, "EBITDA")
+    if EBITDA is not False and EBITDA != "N/A":
+        EBITDA = convertUnits(EBITDA)
 
-    EV = findNextSibling(code, soup, "Enterprise value")
-    EV = convertUnits(EV)
+    EV = findNextSibling_yahoo(code, soup, "Enterprise value")
+    if EV is not False and EV != "N/A":
+        EV = convertUnits(EV)
 
-    PSALES = findNextSibling(code, soup, "Price/sales")
-    PBOOK = findNextSibling(code, soup, "Price/book")
-    ROE = findNextSibling(code, soup, "Return on equity")
-    OM = findNextSibling(code, soup, "Operating margin")
-    DIV = findNextSibling(code, soup, "Forward annual dividend rate")
+    PSALES = findNextSibling_yahoo(code, soup, "Price/sales")
+    PBOOK = findNextSibling_yahoo(code, soup, "Price/book")
+    ROE = findNextSibling_yahoo(code, soup, "Return on equity")
+    OM = findNextSibling_yahoo(code, soup, "Operating margin")
+    DIV = findNextSibling_yahoo(code, soup, "Forward annual dividend rate")
 
     if EBITDA and EV and PSALES and PBOOK and ROE and OM and DIV:
         # print (EBITDA + "" + EV + "" + PSALES + "" + PBOOK + "" + ROE + "" + OM + "" + DIV)
@@ -76,13 +78,16 @@ def fetchThisStock(code):
     PRICE_CHANGE = change_div.findChildren()[1].text.strip("()")
 
     eps_text = in_soup.find('td', text=re.compile('[Trailing EPS.*]|[Trailing EPU.*]'))
-    EPS = eps_text.find_next('td').text
+    EPS = getNextSiblingText_IN(eps_text, in_soup, "EPS")
+    # EPS = eps_text.find_next('td').text
 
     beta75_text = in_soup.find('td', text=re.compile('.*Beta - 75 Days.*'))
-    BETA75 = beta75_text.find_next('td').text
+    BETA75 = getNextSiblingText_IN(beta75_text, in_soup, "75Beta")
+    # BETA75 = beta75_text.find_next('td').text
 
     beta500_text = in_soup.find('td', text=re.compile('.*Beta - 500 Days.*'))
-    BETA500 = beta500_text.find_next('td').text
+    BETA500 = getNextSiblingText_IN(beta500_text, in_soup, "500Beta")
+    # BETA500 = beta500_text.find_next('td').text
 
     if PRICE and PERCENT_CHANGE and PRICE_CHANGE and EPS and BETA75 and BETA500:
         # print ( PRICE + "" + PERCENT_CHANGE + "" + PRICE_CHANGE + "" + EPS + "" + BETA75 + "" + BETA500)
@@ -100,11 +105,19 @@ def fetchThisStock(code):
     return stockData
 
 
-def findNextSibling(code, soup, text):
-    ebitda_text = soup.find('span', text=text)
-    if ebitda_text is not None:
-        ebitda_val = ebitda_text.parent.next_sibling.text
-        return ebitda_val
+def findNextSibling_yahoo(code, soup, text):
+    text_to_find = soup.find('span', text=text)
+    if text_to_find is not None:
+        val = text_to_find.parent.next_sibling.text
+        return val
     else:
         print(code + " " + text + "           ------------- NOT AVAILABLE ------------- ")
+        return False
+
+
+def getNextSiblingText_IN(element, soup, indicator):
+    if element is not None:
+        return element.find_next('td').text
+    else:
+        print(indicator + "           ------------- NOT AVAILABLE ------------- ")
         return False

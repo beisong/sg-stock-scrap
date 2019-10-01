@@ -18,7 +18,7 @@ with open('input_small.csv', 'r') as csvFile:
     for row in reader:
         stocklist.append(row)
 csvFile.close()
-print(stocklist)
+# print(stocklist)
 ###  --------    Read Stock code from file  --------
 
 
@@ -26,10 +26,12 @@ print(stocklist)
 with open('ParsedData.csv', 'w', newline='') as csvFile:
     writer = csv.writer(csvFile)
     writer.writerow(
-        ["Name", "Code", "Industry", "Price", "Day Change", "Day Change %", "EPS", "BETA75", "BETA500", "EBITDA", "EV",
-         "PSALES", "PBOOK", "ROE", "OM", "DIV"])
+        ["Name", "Code", "Industry", "Price", "Day Change", "Day Change %", "EPS", "BETA75", "BETA500", "EBITDA",
+         "Enterprise Value", "Price to Sales", "Price to Book", "Return on Equity", "Operating Margins",
+         "Dividend ($)"])
 
     for oneStock in stocklist:
+        print(oneStock[1])
         response = fetchThisStock(oneStock[1])
         if response:
             writer.writerow(oneStock + response)
