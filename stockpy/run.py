@@ -2,18 +2,14 @@
 import csv
 from fetch import fetchThisStock
 
-###  --------    Read Stock code from file  --------
-## Old code
-# stocklist = []
-# f = open("SGXCode10", "r")
-# for x in f:
-#     stocklist.append(x.rstrip())
-# f.close()
-# print(stocklist)
+import logging
 
+logging.basicConfig(filename='debug.log', level=logging.INFO)
+
+###  --------    Read Stock code from file  --------
 # input get from https://www2.sgx.com/securities/stock-screener
 stocklist = []
-with open('input_small.csv', 'r') as csvFile:
+with open('input.csv', 'r') as csvFile:
     reader = csv.reader(csvFile)
     for row in reader:
         stocklist.append(row)
@@ -32,6 +28,7 @@ with open('ParsedData.csv', 'w', newline='') as csvFile:
 
     for oneStock in stocklist:
         print(oneStock[1])
+        logging.info(oneStock[1])
         response = fetchThisStock(oneStock[1])
         if response:
             writer.writerow(oneStock + response)

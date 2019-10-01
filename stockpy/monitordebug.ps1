@@ -1,0 +1,1 @@
+get-content debug.log -tail 10 -wait

@@ -1,10 +1,12 @@
 # import libraries
 import re
 import time
+import logging
 
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
+logger = logging.getLogger(__name__)
 showElapsed = False
 
 
@@ -15,6 +17,7 @@ def convertUnits(string):
 
 
 def fetchThisStock(code):
+    logger.info("FETCHING :" + code)
     #  ----------------          Yahoo        ------------
     # specify the url (YAHOOOO)
     if showElapsed:
@@ -46,6 +49,7 @@ def fetchThisStock(code):
         # print (EBITDA + "" + EV + "" + PSALES + "" + PBOOK + "" + ROE + "" + OM + "" + DIV)
         pass
     else:
+        logger.error("YAHOO Values Missing for :" + code)
         return
 
     if showElapsed:
@@ -93,6 +97,7 @@ def fetchThisStock(code):
         # print ( PRICE + "" + PERCENT_CHANGE + "" + PRICE_CHANGE + "" + EPS + "" + BETA75 + "" + BETA500)
         pass
     else:
+        logger.error("INote Values Missing for :" + code)
         return
 
     if showElapsed:
@@ -111,6 +116,7 @@ def findNextSibling_yahoo(code, soup, text):
         val = text_to_find.parent.next_sibling.text
         return val
     else:
+        logger.warning(code + " " + text + "           ------------- NOT AVAILABLE ------------- ")
         print(code + " " + text + "           ------------- NOT AVAILABLE ------------- ")
         return False
 
@@ -119,5 +125,6 @@ def getNextSiblingText_IN(element, soup, indicator):
     if element is not None:
         return element.find_next('td').text
     else:
+        logger.warning(indicator + "           ------------- NOT AVAILABLE ------------- ")
         print(indicator + "           ------------- NOT AVAILABLE ------------- ")
         return False
