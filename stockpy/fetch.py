@@ -1,23 +1,38 @@
 # import libraries
 import re
+import time
 
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
 
+def convertUnits(string):
+    # https://stackoverflow.com/questions/51611027/how-to-convert-strings-with-billion-or-million-abbreviation-into-integers-in-a-l
+    m = {'k': 3, 'm': 6, 'b': 9, 't': 12, 'K': 3, 'M': 6, 'B': 9, 'T': 12}
+    return int(float(string[:-1]) * 10 ** m[string[-1]])
+
+
 def fetchThisStock(code):
+    print ("FETCHED CALLED")
     #  ----------------          Yahoo        ------------
     # specify the url (YAHOOOO)
+
+    yahoo_start = time.time()
     yahoo_url = "https://sg.finance.yahoo.com/quote/" + code + ".si/key-statistics?p=" + code + ".si"
 
     # query the website and return the html to the variable ‘page’
     page = urlopen(yahoo_url)  # or add .read() behind
     # print(page.read())
 
-    soup = BeautifulSoup(page, "html.parser")
+    rawsoup = BeautifulSoup(page, "html.parser")
+    soup = rawsoup.find('div', class_='YDC-Col1')
 
     EBITDA = findNextSibling(code, soup, "EBITDA")
+    EBITDA = convertUnits(EBITDA)
+
     EV = findNextSibling(code, soup, "Enterprise value")
+    EV = convertUnits(EV)
+
     PSALES = findNextSibling(code, soup, "Price/sales")
     PBOOK = findNextSibling(code, soup, "Price/book")
     ROE = findNextSibling(code, soup, "Return on equity")
@@ -30,9 +45,15 @@ def fetchThisStock(code):
     else:
         return
 
+    yahoo_end = time.time()
+    print ("YAHOO ELAPSED : %f " % (yahoo_end - yahoo_start))
+
     #  ----------------          Yahoo        ------------
 
     #  ----------------          Investingnote        ------------
+
+    in_start = time.time()
+
     # specify the url  (INVESTING NOTE)
     in_url = "https://www.investingnote.com/stocks/SGX:" + code
     # query the website and return the html to the variable ‘page’
@@ -67,7 +88,9 @@ def fetchThisStock(code):
     else:
         return
 
-        #  ----------------          Investingnote        ------------
+    in_end = time.time()
+    print ("INote  ELAPSED : %f " % (in_end - in_start))
+    #  ----------------          Investingnote        ------------
 
     stockData = [STOCKNAME, code, PRICE, PRICE_CHANGE, PERCENT_CHANGE, EPS, BETA75, BETA500, EBITDA, EV, PSALES, PBOOK,
                  ROE, OM, DIV]
