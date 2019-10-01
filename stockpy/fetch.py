@@ -5,6 +5,8 @@ import time
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
+showElapsed = False
+
 
 def convertUnits(string):
     # https://stackoverflow.com/questions/51611027/how-to-convert-strings-with-billion-or-million-abbreviation-into-integers-in-a-l
@@ -13,11 +15,10 @@ def convertUnits(string):
 
 
 def fetchThisStock(code):
-    print ("FETCHED CALLED")
     #  ----------------          Yahoo        ------------
     # specify the url (YAHOOOO)
-
-    yahoo_start = time.time()
+    if showElapsed:
+        yahoo_start = time.time()
     yahoo_url = "https://sg.finance.yahoo.com/quote/" + code + ".si/key-statistics?p=" + code + ".si"
 
     # query the website and return the html to the variable ‘page’
@@ -45,14 +46,15 @@ def fetchThisStock(code):
     else:
         return
 
-    yahoo_end = time.time()
-    print ("YAHOO ELAPSED : %f " % (yahoo_end - yahoo_start))
+    if showElapsed:
+        yahoo_end = time.time()
+        print ("YAHOO ELAPSED : %f " % (yahoo_end - yahoo_start))
 
     #  ----------------          Yahoo        ------------
 
     #  ----------------          Investingnote        ------------
-
-    in_start = time.time()
+    if showElapsed:
+        in_start = time.time()
 
     # specify the url  (INVESTING NOTE)
     in_url = "https://www.investingnote.com/stocks/SGX:" + code
@@ -62,9 +64,9 @@ def fetchThisStock(code):
 
     in_soup = BeautifulSoup(in_page, "html.parser")
 
-    nameheader = in_soup.find('h4', class_='stock-name')
-    fullname = nameheader.a.span.text
-    STOCKNAME = re.sub(r'\(.*\)', '', fullname).rstrip()  # remove stock code in bracket eg.  (SGX: AZG)
+    # nameheader = in_soup.find('h4', class_='stock-name')
+    # fullname = nameheader.a.span.text
+    # STOCKNAME = re.sub(r'\(.*\)', '', fullname).rstrip()  # remove stock code in bracket eg.  (SGX: AZG)
 
     price_span = in_soup.find('strong', class_='stock-price')
     PRICE = price_span.text
@@ -82,17 +84,18 @@ def fetchThisStock(code):
     beta500_text = in_soup.find('td', text=re.compile('.*Beta - 500 Days.*'))
     BETA500 = beta500_text.find_next('td').text
 
-    if STOCKNAME and PRICE and PERCENT_CHANGE and PRICE_CHANGE and EPS and BETA75 and BETA500:
-        # print (STOCKNAME + "" + PRICE + "" + PERCENT_CHANGE + "" + PRICE_CHANGE + "" + EPS + "" + BETA75 + "" + BETA500)
+    if PRICE and PERCENT_CHANGE and PRICE_CHANGE and EPS and BETA75 and BETA500:
+        # print ( PRICE + "" + PERCENT_CHANGE + "" + PRICE_CHANGE + "" + EPS + "" + BETA75 + "" + BETA500)
         pass
     else:
         return
 
-    in_end = time.time()
-    print ("INote  ELAPSED : %f " % (in_end - in_start))
+    if showElapsed:
+        in_end = time.time()
+        print ("INote  ELAPSED : %f " % (in_end - in_start))
     #  ----------------          Investingnote        ------------
 
-    stockData = [STOCKNAME, code, PRICE, PRICE_CHANGE, PERCENT_CHANGE, EPS, BETA75, BETA500, EBITDA, EV, PSALES, PBOOK,
+    stockData = [PRICE, PRICE_CHANGE, PERCENT_CHANGE, EPS, BETA75, BETA500, EBITDA, EV, PSALES, PBOOK,
                  ROE, OM, DIV]
     return stockData
 

@@ -3,11 +3,21 @@ import csv
 from fetch import fetchThisStock
 
 ###  --------    Read Stock code from file  --------
+## Old code
+# stocklist = []
+# f = open("SGXCode10", "r")
+# for x in f:
+#     stocklist.append(x.rstrip())
+# f.close()
+# print(stocklist)
+
+# input get from https://www2.sgx.com/securities/stock-screener
 stocklist = []
-f = open("SGXCode", "r")
-for x in f:
-    stocklist.append(x.rstrip())
-f.close()
+with open('input_small.csv', 'r') as csvFile:
+    reader = csv.reader(csvFile)
+    for row in reader:
+        stocklist.append(row)
+csvFile.close()
 print(stocklist)
 ###  --------    Read Stock code from file  --------
 
@@ -16,23 +26,12 @@ print(stocklist)
 with open('ParsedData.csv', 'w', newline='') as csvFile:
     writer = csv.writer(csvFile)
     writer.writerow(
-        ["Name", "Code", "Price", "Day Change", "Day Change %", "EPS", "BETA75", "BETA500", "EBITDA", "EV", "PSALES",
-         "PBOOK", "ROE", "OM", "DIV"])
+        ["Name", "Code", "Industry", "Price", "Day Change", "Day Change %", "EPS", "BETA75", "BETA500", "EBITDA", "EV",
+         "PSALES", "PBOOK", "ROE", "OM", "DIV"])
 
-    for i in stocklist:
-        if fetchThisStock(i):
-            print(i)
-            writer.writerow(fetchThisStock(i))
+    for oneStock in stocklist:
+        response = fetchThisStock(oneStock[1])
+        if response:
+            writer.writerow(oneStock + response)
 
 csvFile.close()
-
-# TODO GET VALUE FROM FETCH AND STORE IN CSV
-
-# stockData = [STOCKNAME, code, PRICE, PERCENT_CHANGE, PRICE_CHANGE, EPS, BETA75, BETA500, EBITDA, EV, PSALES, PBOOK,ROE, OM, DIV]
-
-
-# csvData = [['Person', 'Age'], ['Peter', '22'], ['Jasmine', '21'], ['Sam', '24']]
-# with open('ParsedData.csv', 'w', newline='') as csvFile:
-#     writer = csv.writer(csvFile)
-#     writer.writerows(csvData)
-# csvFile.close()
